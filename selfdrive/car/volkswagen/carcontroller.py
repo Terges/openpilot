@@ -85,7 +85,7 @@ class CarController(CarControllerBase):
         self.param_s.put_bool_nonblocking("LastSpeedLimitSignTap", False)
       self.last_speed_limit_sign_tap_prev = CS.params_list.last_speed_limit_sign_tap
 
-      sl_force_active = CS.params_list.speed_limit_control_enabled and (self.frame < (self.sl_force_active_timer * DT_CTRL + 2.0))
+      sl_force_active = CS.params_list.speed_limit_control_enabled and ((self.frame * DT_CTRL) < (self.sl_force_active_timer * DT_CTRL + 2.0))
       sl_inactive = not sl_force_active and (not CS.params_list.speed_limit_control_enabled or (True if self.slc_state == 0 else False))
       sl_temp_inactive = not sl_force_active and (CS.params_list.speed_limit_control_enabled and (True if self.slc_state == 1 else False))
       slc_active = not sl_inactive and not sl_temp_inactive
@@ -186,7 +186,8 @@ class CarController(CarControllerBase):
           elif self.acc_type == 1:
             self.cruise_button = 3 if self.cruise_button == 1 else 4  # resume, set
           if self.frame % self.CCP.BTN_STEP == 0:
-            can_sends.append(self.CCS.create_acc_buttons_control(self.packer_pt, CS.gra_stock_values, frame=(self.frame // self.CCP.BTN_STEP),
+            can_sends.append(self.CCS.create_acc_buttons_control(self.packer_pt, self.ext_bus, CS.gra_stock_values,
+                                                                 frame=(self.frame // self.CCP.BTN_STEP),
                                                                  buttons=self.cruise_button, custom_stock_long=True))
             self.send_count += 1
         else:
